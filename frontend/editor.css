@@ -1,0 +1,359 @@
+/* Editor Specific Styles */
+
+.editor-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg-color);
+}
+
+/* --- Left Sidebar --- */
+.sidebar {
+    width: 250px;
+    background: rgba(30, 41, 59, 0.95);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    transition: width 0.3s ease;
+    flex-shrink: 0;
+}
+
+.sidebar.collapsed {
+    width: 50px;
+}
+
+.sidebar-header {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.sidebar h2 {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar.collapsed h2,
+.sidebar.collapsed .sidebar-content {
+    display: none;
+}
+
+.sidebar.collapsed #toggle-sidebar-btn {
+    transform: rotate(180deg);
+    margin: 0 auto;
+}
+
+.sidebar-content {
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* --- Right Sidebar (Minimap) --- */
+.sidebar-right {
+    width: 200px;
+    background: rgba(30, 41, 59, 0.95);
+    border-left: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+}
+
+.sidebar-right.collapsed {
+    width: 50px;
+}
+
+.sidebar-right.collapsed h2,
+.sidebar-right.collapsed .sidebar-content {
+    display: none;
+}
+
+.sidebar-right.collapsed #toggle-right-sidebar-btn {
+    transform: rotate(180deg);
+    margin: 0 auto;
+}
+
+.minimap-container {
+    width: 180px;
+    height: 180px;
+    margin: 10px auto;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    position: relative;
+    overflow: hidden;
+}
+
+#minimap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Mini Nodes */
+.mini-node {
+    position: absolute;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+/* --- Main Canvas --- */
+.canvas-wrapper {
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    background-image: radial-gradient(#334155 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.canvas-container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.canvas-container:active {
+    cursor: grabbing;
+}
+
+/* The element that gets Scaled (Zoom) */
+#canvas-scaler {
+    width: 100%;
+    height: 100%;
+    transform-origin: 0 0;
+    /* transition: transform 0.1s; remove transition for drag perf */
+}
+
+/* The infinite canvas that moves (Pan) */
+#canvas {
+    width: 5000px;
+    height: 5000px;
+    position: absolute;
+    /* Initial position centered roughly */
+    top: -2000px;
+    left: -2000px;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: var(--card-bg);
+    padding: 5px;
+    border-radius: 8px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    border: 1px solid var(--glass-border);
+    z-index: 20;
+}
+
+#zoom-level {
+    font-size: 0.8rem;
+    min-width: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+.icon-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid transparent;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.icon-btn:hover {
+    background: var(--accent-color);
+}
+
+/* Node Styles (Same as before but refined) */
+.node-template {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 15px;
+    border-radius: 8px;
+    cursor: grab;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.node-template:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent-color);
+}
+
+.node {
+    position: absolute;
+    background: #1e293b;
+    border: 1px solid #475569;
+    border-radius: 10px;
+    min-width: 200px;
+    color: var(--text-primary);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    z-index: 5;
+}
+
+.node.selected {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+}
+
+.node-header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+}
+
+.node-content {
+    padding: 15px;
+}
+
+.node-input,
+.node-output {
+    width: 12px;
+    height: 12px;
+    background: #94a3b8;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: crosshair;
+    border: 2px solid #1e293b;
+    z-index: 6;
+    /* Ensure above node border */
+}
+
+.node-input {
+    left: -6px;
+    background: #22c55e;
+}
+
+.node-output {
+    right: -6px;
+    background: #3b82f6;
+}
+
+.node-input:hover,
+.node-output:hover {
+    transform: translateY(-50%) scale(1.4);
+    background: #fff;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.ports-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.output-port-wrapper {
+    position: relative;
+    text-align: right;
+    padding: 5px 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.output-port-point {
+    width: 12px;
+    height: 12px;
+    background: #3b82f6;
+    border-radius: 50%;
+    position: absolute;
+    right: -21px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: crosshair;
+    border: 2px solid #1e293b;
+    z-index: 6;
+}
+
+.output-port-point:hover {
+    transform: translateY(-50%) scale(1.4);
+    background: #fff;
+}
+
+/* Connections Layer */
+#connections-layer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+path.connection-line {
+    fill: none;
+    stroke: #64748b;
+    stroke-width: 3px;
+    pointer-events: stroke;
+}
+
+path.connection-line:hover {
+    stroke: var(--accent-color);
+    cursor: pointer;
+    stroke-width: 4px;
+}
+
+.full-width {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+input.node-title-input {
+    background: transparent;
+    border: none;
+    color: white;
+    font-weight: bold;
+    width: 100px;
+}
+
+textarea.node-text-area {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    resize: vertical;
+    padding: 5px;
+}
+
+textarea.node-text-area:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}

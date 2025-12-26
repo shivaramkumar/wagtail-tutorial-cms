@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="padding: 50px; text-align: center; font-family: sans-serif;">
+    <h1>{{ page.title }}</h1>
+    <p>{{ page.description }}</p>
+    <hr>
+    <p>This tutorial is served via the API.</p>
+    <p><a href="/api/v2/pages/{{ page.id }}/?fields=steps">View JSON Data</a></p>
+    <p>Please open <code>frontend/index.html</code> to view the interactive tutorial.</p>
+</div>
+{% endblock %}

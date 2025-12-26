@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flow Editor - Troubleshooting Hub</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="editor.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="editor-container">
+        <!-- Left Sidebar: Toolbox -->
+        <aside class="sidebar" id="left-sidebar">
+            <div class="sidebar-header">
+                <h2>Toolbox</h2>
+                <button class="icon-btn" id="toggle-sidebar-btn" title="Toggle Sidebar">«</button>
+            </div>
+            <div class="sidebar-content">
+                <div class="node-template" draggable="true" data-type="start">Start Node</div>
+                <div class="node-template" draggable="true" data-type="instruction">Instruction</div>
+                <div class="node-template" draggable="true" data-type="condition">Condition</div>
+                <div class="node-template" draggable="true" data-type="end">End Node</div>
+                <hr>
+                <button id="save-btn" class="btn-option full-width">Save Flow</button>
+                <button id="clear-btn" class="btn-option full-width danger">Clear Canvas</button>
+            </div>
+        </aside>
+
+        <!-- Main Canvas Area -->
+        <main class="canvas-wrapper" id="canvas-wrapper">
+            <div class="zoom-controls">
+                <button id="zoom-in" class="icon-btn">+</button>
+                <span id="zoom-level">100%</span>
+                <button id="zoom-out" class="icon-btn">-</button>
+                <button id="zoom-reset" class="icon-btn">⟲</button>
+            </div>
+
+            <div class="canvas-container" id="canvas-container">
+                <div id="canvas-scaler">
+                    <div id="canvas">
+                        <!-- SVG Layer for connections -->
+                        <svg id="connections-layer"></svg>
+                        <!-- Nodes will be added here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar: Minimap -->
+        <aside class="sidebar-right" id="right-sidebar">
+            <div class="sidebar-header">
+                <button class="icon-btn" id="toggle-right-sidebar-btn" title="Toggle Overview">»</button>
+                <h2>Overview</h2>
+            </div>
+            <div class="sidebar-content">
+                <div class="minimap-container">
+                    <div id="minimap">
+                        <!-- Scaled down view of nodes -->
+                    </div>
+                </div>
+                <div style="padding: 20px; font-size: 0.8rem; color: var(--text-secondary);">
+                    <p><strong>Overview:</strong></p>
+                    <p>Drag nodes to position.</p>
+                    <p>Drag ports to connect.</p>
+                    <p>Use Zoom controls to adjust view.</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+
+</html>
