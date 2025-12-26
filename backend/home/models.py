@@ -41,4 +41,7 @@ class TutorialPage(Page):
     api_fields = [
         APIField('description'),
         APIField('steps'),
+        APIField('flow_graph'),
     ]
+
+    flow_graph = models.JSONField(blank=True, null=True, help_text="Stores the flow editor graph data (nodes, positions)")

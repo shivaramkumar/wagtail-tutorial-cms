@@ -184,7 +184,8 @@ function createNode(type, x, y) {
         id, type, x, y,
         title: type.charAt(0).toUpperCase() + type.slice(1),
         outputs: type === 'condition' ? ['Yes', 'No'] : (type === 'end' ? [] : ['Next']),
-        inputs: type !== 'start'
+        inputs: type !== 'start',
+        data: {}
     };
     nodes.push(nodeData);
     renderNode(nodeData);
@@ -226,7 +227,15 @@ function renderNode(nodeData) {
     const content = document.createElement('div');
     content.className = 'node-content';
     if (nodeData.type === 'instruction') {
-        content.innerHTML = `<textarea class="node-text-area" placeholder="Enter instructions..."></textarea>`;
+        const textarea = document.createElement('textarea');
+        textarea.className = 'node-text-area';
+        textarea.placeholder = "Enter instructions...";
+        textarea.value = nodeData.data?.text || '';
+        textarea.oninput = (e) => {
+            if (!nodeData.data) nodeData.data = {};
+            nodeData.data.text = e.target.value;
+        };
+        content.appendChild(textarea);
     } else if (nodeData.type === 'condition') {
         content.innerHTML = `<button class="btn-option" style="padding:5px; font-size:0.8rem;" onclick="addOption(${nodeData.id})">+ Option</button>`;
     } else {
@@ -446,7 +455,11 @@ window.addOption = addOption;
 
 // --- Persistence ---
 
-function saveCanvas() {
+const API_BASE = 'http://127.0.0.1:8000';
+const urlParams = new URLSearchParams(window.location.search);
+const pageId = urlParams.get('id') || 3; // Default to ID 3 for testing
+
+async function saveCanvas() {
     const data = {
         nodes,
         connections,
@@ -455,39 +468,63 @@ function saveCanvas() {
         canvasY,
         scale
     };
-    localStorage.setItem('flowEditorData', JSON.stringify(data));
-    alert('Flow saved to local storage!');
+
+    try {
+        const response = await fetch(`${API_BASE}/api/flow/save/${pageId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert('Flow saved to backend successfully!');
+        } else {
+            alert('Error saving flow: ' + result.message);
+        }
+    } catch (e) {
+        console.error("Save failed", e);
+        alert('Network error saving flow.');
+    }
 }
 
-function loadCanvas() {
-    const saved = localStorage.getItem('flowEditorData');
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            nodes = data.nodes || [];
-            connections = data.connections || [];
-            nextId = data.nextId || 1;
-            canvasX = data.canvasX || -2000;
-            canvasY = data.canvasY || -2000;
-            scale = data.scale || 1;
+async function loadCanvas() {
+    try {
+        const response = await fetch(`${API_BASE}/api/flow/get/${pageId}/`);
+        if (response.ok) {
+            const data = await response.json();
 
-            // Clear current DOM nodes for safety
-            document.querySelectorAll('.node').forEach(el => el.remove());
+            if (data && data.nodes && data.nodes.length > 0) {
+                nodes = data.nodes || [];
+                connections = data.connections || [];
+                nextId = data.nextId || 1;
+                canvasX = data.canvasX || -2000;
+                canvasY = data.canvasY || -2000;
+                scale = data.scale || 1;
 
-            // Render loaded nodes
-            nodes.forEach(n => renderNode(n));
-            updateTransform();
-            updateConnections();
-            renderMinimap();
+                // Clear current DOM nodes
+                document.querySelectorAll('.node').forEach(el => el.remove());
 
-        } catch (e) {
-            console.error("Failed to load save:", e);
-            localStorage.removeItem('flowEditorData');
-            loadDefault();
+                // Render loaded nodes
+                nodes.forEach(n => {
+                    renderNode(n);
+                    // Need to potentially re-attach any listeners or specific data handling?
+                    // renderNode handles creating DOM from n.data.
+                });
+                updateTransform();
+                updateConnections();
+                renderMinimap();
+                return;
+            }
         }
-    } else {
-        loadDefault();
+    } catch (e) {
+        console.error("Load failed", e);
     }
+
+    // Fallback if no data or error
+    loadDefault();
 }
 
 function loadDefault() {
