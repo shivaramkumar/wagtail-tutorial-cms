@@ -29,7 +29,28 @@ let nextId = 1;
 
 // --- Initialization ---
 
-function init() {
+async function checkAuth() {
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v2/me/');
+        if (res.ok) {
+            const data = await res.json();
+            if (!data.is_authenticated) {
+                // Not logged in -> Redirect to Landing
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+    } catch (e) {
+        console.error("Auth check failed", e);
+    }
+    return false;
+}
+
+async function init() {
+    const isAuth = await checkAuth();
+    if (!isAuth) return; // Stop if redirecting
+
     updateTransform();
     setupEventListeners();
     setupZoomControls();

@@ -4,6 +4,29 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from .models import TutorialPage
+from django.contrib.auth import authenticate, login, logout
+
+@csrf_exempt
+@require_POST
+def login_view(request):
+    try:
+        data = json.loads(request.body)
+        username = data.get('username')
+        password = data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'status': 'success', 'username': user.get_username()})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid credentials'}, status=401)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@csrf_exempt
+@require_POST
+def logout_view(request):
+    logout(request)
+    return JsonResponse({'status': 'success'})
 
 @csrf_exempt
 @require_GET
@@ -12,6 +35,24 @@ def get_flow_view(request, page_id):
     if not page.flow_graph:
         return JsonResponse({'nodes': [], 'connections': []})
     return JsonResponse(page.flow_graph)
+
+
+@csrf_exempt
+@require_GET
+def current_user_view(request):
+    user = request.user
+    if user.is_authenticated:
+        return JsonResponse({
+            'is_authenticated': True,
+            'username': user.get_username(),
+            'admin_url': '/admin/'
+        })
+    else:
+        return JsonResponse({
+            'is_authenticated': False,
+            'username': '',
+            'admin_url': '/admin/'
+        })
 
 
 @csrf_exempt

@@ -4,7 +4,77 @@ const app = document.getElementById('app');
 let tutorials = [];
 let currentTutorial = null;
 
+// Auth State
+let currentUser = null;
+
+async function checkAuth() {
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/v2/me/');
+        if (res.ok) {
+            const data = await res.json();
+            currentUser = data.is_authenticated ? data : null;
+        }
+    } catch (e) {
+        console.error("Auth check failed", e);
+    }
+}
+
 async function init() {
+    await checkAuth();
+
+    const loginLanding = document.getElementById('login-landing');
+    const appContainer = document.getElementById('app');
+
+    if (!currentUser) {
+        // Show Login Landing
+        loginLanding.classList.remove('hidden');
+        appContainer.classList.add('hidden');
+        setupLoginForm();
+    } else {
+        // Show App
+        loginLanding.classList.add('hidden');
+        appContainer.classList.remove('hidden');
+        loadTutorials();
+    }
+}
+
+function setupLoginForm() {
+    const form = document.getElementById('login-form');
+    const errorMsg = document.getElementById('login-error');
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        errorMsg.innerText = '';
+
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+
+        try {
+            const res = await fetch('http://127.0.0.1:8000/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                // Login successful
+                window.location.reload();
+            } else {
+                errorMsg.innerText = data.message || 'Login failed';
+            }
+        } catch (err) {
+            console.error(err);
+            errorMsg.innerText = 'Network error during login.';
+        }
+    };
+}
+
+async function loadTutorials() {
     try {
         // Fetch pages of type TutorialPage, including fields 'steps' and 'description'
         const response = await fetch(`${API_BASE}/pages/?type=home.TutorialPage&fields=steps,description`);
@@ -21,7 +91,7 @@ async function init() {
                 <div style="margin-top:20px; padding:10px; background: rgba(0,0,0,0.3); border-radius:8px; font-family:monospace; font-size:0.9em;">
                     ${error.message}
                 </div>
-                <button class="btn-option" style="margin-top:20px" onclick="init()">Retry</button>
+                <button class="btn-option" style="margin-top:20px" onclick="loadTutorials()">Retry</button>
             </div>`;
     }
 }
@@ -43,11 +113,11 @@ function renderTutorialList() {
 }
 
 // Attach to window so onclick works
-window.loadTutorial = function(id) {
+window.loadTutorial = function (id) {
     const tutorial = tutorials.find(t => t.id === id);
     if (!tutorial) return;
     currentTutorial = tutorial;
-    
+
     if (tutorial.steps && tutorial.steps.length > 0) {
         renderStep(tutorial.steps[0]);
     } else {
@@ -57,12 +127,12 @@ window.loadTutorial = function(id) {
 
 function renderStep(stepBlock) {
     // stepBlock structure: { type: 'step', value: { step_id, title, content, options } }
-    
+
     // Note: If the streamfield API structure differs, we might need to adjust.
     // Wagtail v2 API returns StreamField as: [{ type: 'step', value: {...} }]
-    
+
     const step = stepBlock.value;
-    
+
     // Process content stream
     const contentHtml = step.content.map(block => {
         if (block.type === 'text') {
@@ -118,10 +188,10 @@ function renderStep(stepBlock) {
     });
 }
 
-window.handleOption = function(nextStepId) {
+window.handleOption = function (nextStepId) {
     if (!nextStepId) {
         // End of flow logic if handled by empty next_step_id
-        renderTutorialList(); 
+        renderTutorialList();
         return;
     }
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,18 +10,42 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="app-container">
         <header>
             <h1>Troubleshooting Hub</h1>
         </header>
-        <main id="app">
-            <div id="loading" class="card">
-                <h2>Loading guides...</h2>
-                <p>Connecting to Wagtail backend...</p>
+        <main>
+            <!-- Login Landing -->
+            <div id="login-landing" class="hidden">
+                <div class="card login-card">
+                    <h2>Welcome Back</h2>
+                    <p>Please log in to access troubleshooting guides.</p>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <input type="text" id="username" placeholder="Username" required class="input-modern">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" id="password" placeholder="Password" required class="input-modern">
+                        </div>
+                        <button type="submit" class="btn-option full-width">Log In</button>
+                        <p id="login-error" class="error-msg"></p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Main App Content -->
+            <div id="app" class="hidden">
+                <div id="loading" class="card">
+                    <h2>Loading guides...</h2>
+                    <p>Connecting to Wagtail backend...</p>
+                </div>
             </div>
         </main>
     </div>
+    <script src="nav.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
