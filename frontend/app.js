@@ -1,4 +1,4 @@
-const API_BASE = 'http://127.0.0.1:8000/api/v2';
+const API_BASE = 'http://localhost:8000/api/v2';
 const app = document.getElementById('app');
 
 let tutorials = [];
@@ -8,29 +8,38 @@ let currentTutorial = null;
 let currentUser = null;
 
 async function checkAuth() {
+    console.log("checkAuth: Starting...");
     try {
-        const res = await fetch('http://127.0.0.1:8000/api/v2/me/');
+        const res = await fetch('http://localhost:8000/api/v2/me/', { credentials: 'include' });
+        console.log("checkAuth: Fetch status:", res.status);
         if (res.ok) {
             const data = await res.json();
+            console.log("checkAuth: Data received:", data);
             currentUser = data.is_authenticated ? data : null;
+        } else {
+            console.log("checkAuth: Fetch failed (not ok)");
         }
     } catch (e) {
-        console.error("Auth check failed", e);
+        console.error("checkAuth: Exception:", e);
     }
 }
 
 async function init() {
+    console.log("init: App starting...");
     await checkAuth();
+    console.log("init: currentUser is:", currentUser);
 
     const loginLanding = document.getElementById('login-landing');
     const appContainer = document.getElementById('app');
 
     if (!currentUser) {
+        console.log("init: Showing login form");
         // Show Login Landing
         loginLanding.classList.remove('hidden');
         appContainer.classList.add('hidden');
         setupLoginForm();
     } else {
+        console.log("init: User authenticated. Showing app.");
         // Show App
         loginLanding.classList.add('hidden');
         appContainer.classList.remove('hidden');
@@ -44,6 +53,7 @@ function setupLoginForm() {
 
     form.onsubmit = async (e) => {
         e.preventDefault();
+        console.log("login-form: Submit triggered");
         errorMsg.innerText = '';
 
         const usernameInput = document.getElementById('username');
@@ -52,23 +62,29 @@ function setupLoginForm() {
         const password = passwordInput.value;
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/api/login/', {
+            console.log("login-form: Sending fetch request...");
+            const res = await fetch('http://localhost:8000/api/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                credentials: 'include'
             });
+            console.log("login-form: Response status:", res.status);
             const data = await res.json();
+            console.log("login-form: Response data:", data);
 
             if (data.status === 'success') {
                 // Login successful
+                console.log("login-form: Login success. Reloading...");
                 window.location.reload();
             } else {
+                console.log("login-form: Login failed message:", data.message);
                 errorMsg.innerText = data.message || 'Login failed';
             }
         } catch (err) {
-            console.error(err);
+            console.error("login-form: Exception:", err);
             errorMsg.innerText = 'Network error during login.';
         }
     };
@@ -77,7 +93,7 @@ function setupLoginForm() {
 async function loadTutorials() {
     try {
         // Fetch pages of type TutorialPage, including fields 'steps' and 'description'
-        const response = await fetch(`${API_BASE}/pages/?type=home.TutorialPage&fields=steps,description`);
+        const response = await fetch(`${API_BASE}/pages/?type=home.TutorialPage&fields=steps,description`, { credentials: 'include' });
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         tutorials = data.items;
@@ -98,7 +114,7 @@ async function loadTutorials() {
 
 function renderTutorialList() {
     if (tutorials.length === 0) {
-        app.innerHTML = `<div class="card"><h2>No Tutorials Found</h2><p>Please add some tutorials in the Wagtail Admin (http://127.0.0.1:8000/admin).</p></div>`;
+        app.innerHTML = `<div class="card"><h2>No Tutorials Found</h2><p>Please add some tutorials in the Wagtail Admin (http://localhost:8000/admin).</p></div>`;
         return;
     }
 
@@ -173,7 +189,7 @@ function renderStep(stepBlock) {
     document.querySelectorAll('.image-wrapper').forEach(async el => {
         const id = el.dataset.imageId;
         try {
-            const res = await fetch(`${API_BASE}/images/${id}/`);
+            const res = await fetch(`${API_BASE}/images/${id}/`, { credentials: 'include' });
             if (res.ok) {
                 const imgData = await res.json();
                 // Wagtail images API returns 'meta' with 'download_url' usually, or separate renditions.

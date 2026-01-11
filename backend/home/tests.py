@@ -60,3 +60,60 @@ class FlowApiTests(WagtailPageTestCase):
         self.assertEqual(len(opts), 1)
         self.assertEqual(opts[0]['label'], 'Next')
         self.assertEqual(opts[0]['next_step_id'], '2')
+
+from django.contrib.auth.models import User
+from django.test import TestCase
+
+class AuthApiTests(TestCase):
+    def setUp(self):
+        self.username = 'testuser_api'
+        self.password = 'password123'
+        self.user = User.objects.create_user(username=self.username, password=self.password)
+
+    def test_api_login_success(self):
+        response = self.client.post(
+            '/api/login/',
+            data=json.dumps({'username': self.username, 'password': self.password}),
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['status'], 'success')
+        self.assertEqual(data['username'], self.username)
+        # Check that session cookie is set
+        self.assertIn('sessionid', response.cookies)
+
+    def test_api_login_failure(self):
+        response = self.client.post(
+            '/api/login/',
+            data=json.dumps({'username': self.username, 'password': 'wrongpassword'}),
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 401)
+        data = response.json()
+        self.assertEqual(data['status'], 'error')
+
+    def test_current_user_authenticated(self):
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get('/api/v2/me/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['is_authenticated'])
+        self.assertEqual(data['username'], self.username)
+
+    def test_current_user_anonymous(self):
+        response = self.client.get('/api/v2/me/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertFalse(data['is_authenticated'])
+
+    def test_api_logout(self):
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.post('/api/logout/')
+        self.assertEqual(response.status_code, 200)
+        
+        # Verify user is logged out
+        response = self.client.get('/api/v2/me/')
+        data = response.json()
+        self.assertFalse(data['is_authenticated'])
+
